@@ -1,0 +1,29 @@
+{
+  "name": "turf-safe-ops",
+  "version": "1.0.0",
+  "description": "turf intersect module",
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Lemaf/turf.git"
+  },
+  "keywords": [
+    "turf",
+    "gis",
+    "intersect"
+  ],
+  "author": "LEMAF",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Turfjs/turf/issues"
+  },
+  "homepage": "https://github.com/Turfjs/turf",
+  "devDependencies": {},
+  "dependencies": {
+    "jsts": "1.3.0",
+    "@turf/unkink-polygon": "4.1.0"
+  }
+}
