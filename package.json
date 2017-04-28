@@ -1,10 +1,11 @@
 {
   "name": "turf-safe-ops",
   "version": "1.0.0",
-  "description": "turf intersect module",
+  "description": "turf safe operations module",
   "main": "index.js",
   "files": [
-    "index.js"
+    "index.js",
+    "helpers.js"
   ],
   "repository": {
     "type": "git",
@@ -13,13 +14,13 @@
   "keywords": [
     "turf",
     "gis",
-    "intersect"
+    "intersect",
+    "difference",
+    "union",
+    "validation"
   ],
   "author": "LEMAF",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Turfjs/turf/issues"
-  },
   "homepage": "https://github.com/Turfjs/turf",
   "devDependencies": {},
   "dependencies": {
