@@ -10,7 +10,6 @@ var reader = new jsts.io.GeoJSONReader(),
 
 /**
  * Safe intersect between polygons.
- * @return {[type]}    [description]
  */
 var safeIntersect = function (poly1, poly2) {
 
@@ -45,7 +44,6 @@ var safeIntersect = function (poly1, poly2) {
 
 /**
  * Safe difference between polygons.
- * @return {[type]}    [description]
  */
 var safeDifference = function (poly1, poly2) {
 
@@ -80,7 +78,6 @@ var safeDifference = function (poly1, poly2) {
 
 /**
  * Safe union between polygons.
- * @return {[type]}    [description]
  */
 var safeUnion = function() {
 
@@ -99,6 +96,42 @@ var safeUnion = function() {
     }
 
     result = removePointsAndLinestrings(result);
+
+    result = writer.write(result);
+
+    return {
+        type: 'Feature',
+        geometry: result,
+        properties: arguments[0].properties
+    };
+
+};
+
+/**
+ * Same as safeUnion, but expects the last argument to be a
+ * buffer value to apply to the result.
+ */
+var safeUnionWithBuffer = function() {
+
+    var geom,
+        poly = arguments[0];
+    if (poly.type === 'Feature') geom = poly.geometry;
+    else geom = poly;
+
+    var result = getValidJSTSPolygon(geom, reader);
+
+    for (var i = 1; i < arguments.length -1; i++) {
+        poly = arguments[i];
+        if (poly.type === 'Feature') geom = poly.geometry;
+        else geom = poly;
+        result = result.union(getValidJSTSPolygon(geom, reader));
+    }
+
+    result = removePointsAndLinestrings(result);
+
+    var bufferValue = arguments[arguments.length - 1];
+
+    result = result.buffer(bufferValue || 0.0);
 
     result = writer.write(result);
 
