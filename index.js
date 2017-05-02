@@ -11,7 +11,7 @@ var reader = new jsts.io.GeoJSONReader(),
 /**
  * Safe intersect between polygons.
  */
-var safeIntersect = function (poly1, poly2) {
+var safeIntersect = function (poly1, poly2, bufferValue) {
 
     var geom1, geom2;
     if (poly1.type === 'Feature') geom1 = poly1.geometry;
@@ -30,6 +30,10 @@ var safeIntersect = function (poly1, poly2) {
 
     result = removePointsAndLinestrings(result);
 
+    if(bufferValue){
+        result = result.buffer(bufferValue);
+    }
+
     var writer = new jsts.io.GeoJSONWriter();
 
     var geojsonGeometry = writer.write(result);
@@ -45,7 +49,7 @@ var safeIntersect = function (poly1, poly2) {
 /**
  * Safe difference between polygons.
  */
-var safeDifference = function (poly1, poly2) {
+var safeDifference = function (poly1, poly2, bufferValue) {
 
     var geom1, geom2;
     if (poly1.type === 'Feature') geom1 = poly1.geometry;
@@ -63,6 +67,10 @@ var safeDifference = function (poly1, poly2) {
     };
 
     result = removePointsAndLinestrings(result);
+
+    if(bufferValue){
+        result = result.buffer(bufferValue);
+    }
 
     var geojsonGeometry = writer.write(result);
 
