@@ -1,6 +1,6 @@
 {
   "name": "turf-safe-ops",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "turf safe operations module",
   "main": "index.js",
   "files": [
