@@ -8,10 +8,44 @@ var getValidJSTSPolygon = safe_helpers.getValidJSTSPolygon;
 var reader = new jsts.io.GeoJSONReader(),
     writer = new jsts.io.GeoJSONWriter();
 
+
+function applyOpWithBuffer(operation, geom1, geom2, bufferConfig) {
+
+    var result,
+        bufferValue = bufferConfig.min;
+
+    while(!result && bufferValue < bufferConfig.max) {
+
+        try{
+            result = geom1[operation](geom2);
+        }
+        catch(e){
+            geom1 = geom1.buffer(bufferValue || 0.0);
+        }
+
+        if(!result){
+
+            try{
+                result = geom1[operation](geom2);
+            }
+            catch(e){
+                geom2 = geom2.buffer(bufferValue || 0.0);
+            }
+
+        }
+
+        bufferValue *= 10;
+
+    }
+
+    return result;
+
+}
+
 /**
  * Safe intersect between polygons.
  */
-var safeIntersect = function (poly1, poly2, bufferValue) {
+var safeIntersect = function (poly1, poly2, inputBufferConfig, outputBufferValue) {
 
     var geom1, geom2;
     if (poly1.type === 'Feature') geom1 = poly1.geometry;
@@ -22,16 +56,21 @@ var safeIntersect = function (poly1, poly2, bufferValue) {
     var a = getValidJSTSPolygon(geom1, reader);
     var b = getValidJSTSPolygon(geom2, reader);
 
-    var result = a.intersection(b);
+    var result;
+    if(inputBufferConfig){
+        result = applyOpWithBuffer('intersection', a, b, inputBufferConfig);
+    }else{
+        result = a.intersection(b);
+    }
 
-    if (result.isEmpty()) {
+    if (!result || result.isEmpty()) {
         return undefined;
     }
 
     result = removePointsAndLinestrings(result);
 
-    if(bufferValue){
-        result = result.buffer(bufferValue);
+    if(outputBufferValue){
+        result = result.buffer(outputBufferValue);
     }
 
     var writer = new jsts.io.GeoJSONWriter();
@@ -49,7 +88,7 @@ var safeIntersect = function (poly1, poly2, bufferValue) {
 /**
  * Safe difference between polygons.
  */
-var safeDifference = function (poly1, poly2, bufferValue) {
+var safeDifference = function (poly1, poly2, inputBufferConfig, outputBufferValue) {
 
     var geom1, geom2;
     if (poly1.type === 'Feature') geom1 = poly1.geometry;
@@ -60,16 +99,21 @@ var safeDifference = function (poly1, poly2, bufferValue) {
     var a = getValidJSTSPolygon(geom1, reader);
     var b = getValidJSTSPolygon(geom2, reader);
 
-    var result = a.difference(b);
+    var result;
+    if(inputBufferConfig){
+        result = applyOpWithBuffer('difference', a, b, inputBufferConfig);
+    }else{
+        result = a.difference(b);
+    }
 
-    if (result.isEmpty()){
+    if (!result || result.isEmpty()) {
         return undefined;
-    };
+    }
 
     result = removePointsAndLinestrings(result);
 
-    if(bufferValue){
-        result = result.buffer(bufferValue);
+    if(outputBufferValue){
+        result = result.buffer(outputBufferValue);
     }
 
     var geojsonGeometry = writer.write(result);
