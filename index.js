@@ -198,5 +198,6 @@ var safeUnionWithBuffer = function() {
 module.exports = {
     safeIntersect: safeIntersect,
     safeDifference: safeDifference,
-    safeUnion: safeUnion
+    safeUnion: safeUnion,
+    safeUnionWithBuffer: safeUnionWithBuffer
 };
