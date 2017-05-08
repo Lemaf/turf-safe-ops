@@ -1,6 +1,7 @@
 // depend on jsts for now http://bjornharrtell.github.io/jsts/
 var jsts = require('jsts'),
-    unkinkPolygon = require('@turf/unkink-polygon');
+    unkinkPolygon = require('@turf/unkink-polygon'),
+        factory = new jsts.geom.GeometryFactory();
 
 /**
  * Removes Linestrings and Points that may appear after an operation
@@ -28,7 +29,7 @@ function removePointsAndLinestrings(geometryJSTS) {
             }
         }
 
-        return new jsts.geom.GeometryFactory().createMultiPolygon(geoms);
+        return factory.createMultiPolygon(geoms);
 
     }
 
@@ -41,7 +42,7 @@ function removePointsAndLinestrings(geometryJSTS) {
  */
 function getValidJSTSPolygon(geojson, reader) {
 
-    var polygonJSTS = reader.read(geojson);
+    let polygonJSTS = reader.read(geojson);
 
     if(polygonJSTS.isValid()) {
         return polygonJSTS;
@@ -51,18 +52,17 @@ function getValidJSTSPolygon(geojson, reader) {
         geojson = {type: 'Feature', geometry: geojson};
     }
 
-    var splitPolygon = unkinkPolygon(geojson);
+    let splitPolygon = unkinkPolygon(geojson);
 
     if(splitPolygon && splitPolygon.features){
 
-        var reader = new jsts.io.GeoJSONReader(),
-            jstsPolygons = [];
+        let jstsPolygons = [];
 
-        for (var i = 0; i < splitPolygon.features.length; i++) {
+        for (let i = 0; i < splitPolygon.features.length; i++) {
             jstsPolygons.push(reader.read(splitPolygon.features[i].geometry));
         }
 
-        var multiPolygon = new jsts.geom.GeometryFactory().createMultiPolygon(jstsPolygons);
+        let multiPolygon = new jsts.geom.GeometryFactory().createMultiPolygon(jstsPolygons);
 
         if(multiPolygon.isValid()) {
             return multiPolygon;

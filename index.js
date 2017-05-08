@@ -11,7 +11,7 @@ var reader = new jsts.io.GeoJSONReader(),
 
 function applyOpWithBuffer(operation, geom1, geom2, bufferConfig) {
 
-    var result,
+    let result,
         bufferValue = bufferConfig.min;
 
     while(!result && bufferValue < bufferConfig.max) {
@@ -47,16 +47,20 @@ function applyOpWithBuffer(operation, geom1, geom2, bufferConfig) {
  */
 var safeIntersect = function (poly1, poly2, inputBufferConfig, outputBufferValue) {
 
-    var geom1, geom2;
+    let geom1, geom2;
     if (poly1.type === 'Feature') geom1 = poly1.geometry;
     else geom1 = poly1;
     if (poly2.type === 'Feature') geom2 = poly2.geometry;
     else geom2 = poly2;
 
-    var a = getValidJSTSPolygon(geom1, reader);
-    var b = getValidJSTSPolygon(geom2, reader);
+    let a = getValidJSTSPolygon(geom1, reader);
+    let b = getValidJSTSPolygon(geom2, reader);
 
-    var result;
+    if(!a || !b) {
+        return undefined;
+    }
+
+    let result;
     if(inputBufferConfig){
         result = applyOpWithBuffer('intersection', a, b, inputBufferConfig);
     }else{
@@ -73,9 +77,7 @@ var safeIntersect = function (poly1, poly2, inputBufferConfig, outputBufferValue
         result = result.buffer(outputBufferValue);
     }
 
-    var writer = new jsts.io.GeoJSONWriter();
-
-    var geojsonGeometry = writer.write(result);
+    let geojsonGeometry = writer.write(result);
 
     return {
         type: 'Feature',
@@ -85,21 +87,40 @@ var safeIntersect = function (poly1, poly2, inputBufferConfig, outputBufferValue
 
 };
 
-/**
- * Safe difference between polygons.
- */
-var safeDifference = function (poly1, poly2, inputBufferConfig, outputBufferValue) {
+var safeIntersects = function(poly1, poly2) {
 
-    var geom1, geom2;
+    let geom1, geom2;
     if (poly1.type === 'Feature') geom1 = poly1.geometry;
     else geom1 = poly1;
     if (poly2.type === 'Feature') geom2 = poly2.geometry;
     else geom2 = poly2;
 
-    var a = getValidJSTSPolygon(geom1, reader);
-    var b = getValidJSTSPolygon(geom2, reader);
+    let a = getValidJSTSPolygon(geom1, reader),
+        b = getValidJSTSPolygon(geom2, reader);
 
-    var result;
+    return a.intersects(b);
+
+};
+
+/**
+ * Safe difference between polygons.
+ */
+var safeDifference = function (poly1, poly2, inputBufferConfig, outputBufferValue) {
+
+    let geom1, geom2;
+    if (poly1.type === 'Feature') geom1 = poly1.geometry;
+    else geom1 = poly1;
+    if (poly2.type === 'Feature') geom2 = poly2.geometry;
+    else geom2 = poly2;
+
+    let a = getValidJSTSPolygon(geom1, reader);
+    let b = getValidJSTSPolygon(geom2, reader);
+
+    if(!a || !b) {
+        return undefined;
+    }
+
+    let result;
     if(inputBufferConfig){
         result = applyOpWithBuffer('difference', a, b, inputBufferConfig);
     }else{
@@ -116,7 +137,7 @@ var safeDifference = function (poly1, poly2, inputBufferConfig, outputBufferValu
         result = result.buffer(outputBufferValue);
     }
 
-    var geojsonGeometry = writer.write(result);
+    let geojsonGeometry = writer.write(result);
 
     poly1.geometry = result;
 
@@ -133,14 +154,14 @@ var safeDifference = function (poly1, poly2, inputBufferConfig, outputBufferValu
  */
 var safeUnion = function() {
 
-    var geom,
+    let geom,
         poly = arguments[0];
     if (poly.type === 'Feature') geom = poly.geometry;
     else geom = poly;
 
-    var result = getValidJSTSPolygon(geom, reader);
+    let result = getValidJSTSPolygon(geom, reader);
 
-    for (var i = 1; i < arguments.length; i++) {
+    for (let i = 1; i < arguments.length; i++) {
         poly = arguments[i];
         if (poly.type === 'Feature') geom = poly.geometry;
         else geom = poly;
@@ -165,14 +186,14 @@ var safeUnion = function() {
  */
 var safeUnionWithBuffer = function() {
 
-    var geom,
+    let geom,
         poly = arguments[0];
     if (poly.type === 'Feature') geom = poly.geometry;
     else geom = poly;
 
-    var result = getValidJSTSPolygon(geom, reader);
+    let result = getValidJSTSPolygon(geom, reader);
 
-    for (var i = 1; i < arguments.length -1; i++) {
+    for (let i = 1; i < arguments.length -1; i++) {
         poly = arguments[i];
         if (poly.type === 'Feature') geom = poly.geometry;
         else geom = poly;
@@ -181,7 +202,7 @@ var safeUnionWithBuffer = function() {
 
     result = removePointsAndLinestrings(result);
 
-    var bufferValue = arguments[arguments.length - 1];
+    let bufferValue = arguments[arguments.length - 1];
 
     result = result.buffer(bufferValue || 0.0);
 
@@ -199,5 +220,6 @@ module.exports = {
     safeIntersect: safeIntersect,
     safeDifference: safeDifference,
     safeUnion: safeUnion,
-    safeUnionWithBuffer: safeUnionWithBuffer
+    safeUnionWithBuffer: safeUnionWithBuffer,
+    safeIntersects: safeIntersects
 };
