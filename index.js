@@ -76,6 +76,10 @@ var safeIntersect = function (poly1, poly2, inputBufferConfig, outputBufferValue
     if(outputBufferValue){
         result = result.buffer(outputBufferValue);
     }
+    
+    if (!result || result.isEmpty()) {
+        return undefined;
+    }
 
     let geojsonGeometry = writer.write(result);
 
